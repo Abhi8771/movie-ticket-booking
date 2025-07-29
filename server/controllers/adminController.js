@@ -59,3 +59,26 @@ export const getAllBookings = async (req, res) => {
 
     }
 }
+
+export const deleteShow = async (req, res) => {
+  try {
+    const showId = req.params.id;
+
+    // Step 1: Check if show exists
+    const show = await Show.findById(showId);
+    if (!show) {
+      return res.status(404).json({ success: false, message: "Show not found" });
+    }
+
+    // Step 2: Delete the show
+    await Show.findByIdAndDelete(showId);
+
+    // Step 3 (Optional): Delete all bookings linked to the deleted show
+    await Booking.deleteMany({ show: showId });
+
+    return res.status(200).json({ success: true, message: "Show and related bookings deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting show:", error);
+    return res.status(500).json({ success: false, message: "Server error while deleting show" });
+  }
+};

@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Loading from '../components/Loading';
 import BlurCircle from '../components/BlurCircle';
 import timeFormat from '../lib/timeFormat';
 import { dateFormat } from '../lib/dateFormat';
 import { useAppContext } from '../context/AppContext';
-import { Link } from 'react-router-dom';
 
 const MyBookings = () => {
   const currency = import.meta.env.VITE_CURRENCY;
   const { axios, getToken, user } = useAppContext();
+  const location = useLocation(); // ✅ React Router hook to access query params
 
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // ✅ Fetch user's bookings
   const getMyBookings = async () => {
     try {
       const { data } = await axios.get('/api/user/bookings', {
@@ -23,16 +25,25 @@ const MyBookings = () => {
         setBookings(data.bookings);
       }
     } catch (error) {
-      console.log(error);
+      console.log('Failed to fetch bookings:', error);
     }
     setIsLoading(false);
   };
 
+  // ✅ Initial fetch when user is available
   useEffect(() => {
     if (user) {
       getMyBookings();
     }
   }, [user]);
+
+  // ✅ Re-fetch if Stripe redirects with ?payment=success
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    if (query.get('payment') === 'success') {
+      getMyBookings();
+    }
+  }, [location.search]);
 
   return !isLoading ? (
     <div className='relative px-6 md:px-16 lg:px-40 pt-30 md:pt-40 min-h-[80vh]'>
@@ -40,6 +51,7 @@ const MyBookings = () => {
       <div>
         <BlurCircle bottom='0px' left='600px' />
       </div>
+
       <h1 className='text-lg font-semibold mb-4'>My Bookings</h1>
 
       {bookings.length === 0 && (
@@ -51,6 +63,7 @@ const MyBookings = () => {
           key={index}
           className='flex flex-col md:flex-row justify-between bg-primary/8 border border-primary/20 rounded-lg mt-4 p-2 max-w-3xl'
         >
+          {/* Movie Poster + Info */}
           <div className='flex flex-col md:flex-row'>
             <img
               src={item.show.movie.poster_path}
@@ -68,6 +81,7 @@ const MyBookings = () => {
             </div>
           </div>
 
+          {/* Price, Pay Button, Seats Info */}
           <div className='flex flex-col md:items-end md:text-right justify-between p-4'>
             <div className='flex items-center gap-4'>
               <p className='text-2xl font-semibold mb-3'>
@@ -76,12 +90,14 @@ const MyBookings = () => {
               </p>
 
               {!item.isPaid && item.paymentLink ? (
-                <Link to={item.paymentLink}
-                  onClick={() => (window.location.href = item.paymentLink)}
+                <a
+                  href={item.paymentLink}
                   className='bg-primary px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer'
+                  target='_blank'
+                  rel='noopener noreferrer'
                 >
                   Pay Now
-                </Link>
+                </a>
               ) : !item.isPaid && !item.paymentLink ? (
                 <p className='text-sm text-red-500'>Payment link unavailable</p>
               ) : null}
