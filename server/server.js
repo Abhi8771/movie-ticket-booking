@@ -18,7 +18,9 @@ const PORT = process.env.PORT || 3000;
 await connectDB()
 
 // Stripe Webhooks route
-app.use('/api/stripe', express.raw({type: 'application/json'}), stripeWebhooks)
+// Stripe webhook should come BEFORE express.json()
+app.use('/api/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);
+
 
 // Middleware
 app.use(express.json());

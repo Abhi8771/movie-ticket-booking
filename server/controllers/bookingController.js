@@ -1,6 +1,9 @@
+import { inngest } from "../inngest/index.js";
 import Booking from "../models/Booking.js";
 import Show from "../models/Show.js";
 import stripe from "stripe";
+
+const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
 
 // Function to check availability of selected seats for a movie
 const checkSeatsAvailability = async (showId, selectedSeats) => {
@@ -47,8 +50,6 @@ export const createBooking = async (req, res) => {
     showData.markModified("occupiedSeats");
     await showData.save();
 
-    const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
-
     const line_items = [
       {
         price_data: {
@@ -56,7 +57,7 @@ export const createBooking = async (req, res) => {
           product_data: {
             name: showData.movie.title,
           },
-          unit_amount: Math.floor(amount * 100), // convert to cents
+          unit_amount: Math.floor(amount * 100),
         },
         quantity: 1,
       },
@@ -75,6 +76,13 @@ export const createBooking = async (req, res) => {
 
     booking.paymentLink = session.url;
     await booking.save();
+
+    // Run inngest scheduler function to check payment status after 10 minutes
+    await inngest.send({
+      name: "app/checkpayment",
+      data: { bookingId: booking._id.toString()},
+    });
+
 
     res.json({ success: true, url: session.url });
   } catch (error) {
