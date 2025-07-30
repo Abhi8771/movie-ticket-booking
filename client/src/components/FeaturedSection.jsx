@@ -28,7 +28,7 @@ const FeaturedSection = () => {
                 ))}
             </div>
 
-            <div className='flex justify-center mt-20'>
+            <div className='flex justify-center mb-10 mt-20' >
                 <button
                     onClick={() => {
                         navigate('/movies');

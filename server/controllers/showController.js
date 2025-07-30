@@ -5,7 +5,19 @@ import Show from '../models/Show.js';
 // API to get now playing movies (simulated with popular titles)
 export const getNowPlayingMovies = async (req, res) => {
   try {
-    const movieTitles = ['Inception', 'Interstellar', 'The Dark Knight']; // you can expand this
+    const movieTitles = [
+      'Inception',
+      'Interstellar',
+      'The Dark Knight',
+      'The Matrix',
+      'Avatar',
+      'Gladiator',
+      'Titanic',
+      'The Godfather',
+      'Avengers: Endgame',
+      'Joker'
+    ];
+
     const movies = [];
 
     for (let title of movieTitles) {
@@ -18,6 +30,8 @@ export const getNowPlayingMovies = async (req, res) => {
 
       if (data.Response === 'True') {
         movies.push(data);
+      } else {
+        console.warn(`OMDB lookup failed for "${title}":`, data.Error);
       }
     }
 
@@ -27,6 +41,7 @@ export const getNowPlayingMovies = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
 
 // API to add new shows to the database
 export const addShow = async (req, res) => {

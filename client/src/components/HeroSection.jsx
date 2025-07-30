@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { assets } from '../assets/assets'
 import { ArrowRight, Calendar1Icon, Clock1Icon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import './HeroSection.css';
 
 const slides = [
   {
@@ -71,7 +72,9 @@ const HeroSection = () => {
 
       <p className='max-w-md text-gray-300'>{slide.description}</p>
 
-      <button
+      
+<div className="rainbow relative z-0 overflow-hidden p-0.5 flex items-center justify-center rounded-full hover:scale-105 transition duration-300 active:scale-100">
+  <button
         onClick={() => navigate('/movies')}
         className='flex items-center gap-1 px-6 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer'
         aria-label='Explore Movies'
@@ -79,6 +82,7 @@ const HeroSection = () => {
         Explore Movies
         <ArrowRight className='w-5 h-5' />
       </button>
+</div>
     </div>
   )
 }
