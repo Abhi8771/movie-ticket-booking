@@ -6,7 +6,7 @@ import { useAppContext } from '../context/AppContext';
 
 
 const Favorite = () => {
-  const { favoriteMovies } = useAppContext(); // ✅ Use favorite movies from context
+  const { favoriteMovies } = useAppContext(); 
 
   return favoriteMovies.length > 0 ? (
     

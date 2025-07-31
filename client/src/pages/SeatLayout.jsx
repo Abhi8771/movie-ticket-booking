@@ -19,7 +19,7 @@ const SeatLayout = () => {
   const navigate = useNavigate();
   const { axios, getToken, user } = useAppContext();
 
-  // ✅ Fix 1: Correct API endpoint
+  //  get Shows
   const getShow = async () => {
     try {
       const { data } = await axios.get(`/api/shows/${id}`);
@@ -85,7 +85,6 @@ const SeatLayout = () => {
     }
   };
 
-  // ✅ Fix 2: Correct headers spelling
   const bookTickets = async () => {
     try {
       if (!user) return toast.error('Please login to proceed');

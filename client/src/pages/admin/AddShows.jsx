@@ -100,7 +100,7 @@ const AddShows = () => {
       <Title text1="Add" text2="Shows" />
 
       <div className="grid lg:grid-cols-3 gap-10 mt-10">
-        {/* Movie Selection - Wider Column */}
+        {/* Movie Selection*/}
         <div className="lg:col-span-2">
           <h2 className="text-lg font-semibold mb-3">🎬 Select a Movie</h2>
           <div className="overflow-y-auto max-h-[600px] pr-2">
@@ -142,7 +142,7 @@ const AddShows = () => {
           </div>
         </div>
 
-        {/* Show Details - Narrow Column */}
+        {/* Show Details*/}
         <div className="lg:col-span-1">
           <h2 className="text-lg font-semibold mb-3">🎟️ Add Show Details</h2>
 
@@ -208,7 +208,6 @@ const AddShows = () => {
             </div>
           )}
 
-          {/* Submit Button */}
           <div className="mt-6">
             <button
               onClick={handleSubmit}

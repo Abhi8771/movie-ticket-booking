@@ -14,7 +14,7 @@ const ListShows = () => {
   const [shows, setShows] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // FETCH ALL SHOWS
+  // Fetch all shows
   const getAllShows = async () => {
     try {
       const { data } = await axios.get("/api/admin/all-shows", {
@@ -28,7 +28,7 @@ const ListShows = () => {
     }
   };
 
-  // DELETE SHOW HANDLER
+  // Delete a show
   const handleDeleteShow = async (showId) => {
     const confirmDelete = confirm("Are you sure you want to delete this show?");
     if (!confirmDelete) return;

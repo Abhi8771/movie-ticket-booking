@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 const MovieDetails = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // OMDB or internal movie ID
+  const { id } = useParams(); 
   const [show, setShow] = useState(null);
 
   const {

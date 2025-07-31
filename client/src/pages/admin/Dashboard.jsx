@@ -24,13 +24,13 @@ const DashBoard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = await getToken();
-      console.log("✅ Clerk token:", token);
+      console.log("Clerk token:", token);
 
       const { data } = await axios.get("/api/admin/dashboard", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("📊 DASHBOARD API RESPONSE:", data);
+      console.log("DASHBOARD API RESPONSE:", data);
 
       if (data.success) {
         setDashboardData(data.dashboardData);
@@ -38,7 +38,7 @@ const DashBoard = () => {
         toast.error(data.message || "Failed to load dashboard");
       }
     } catch (error) {
-      console.error("❌ Dashboard fetch error:", error);
+      console.error("Dashboard fetch error:", error);
       toast.error("Error fetching dashboard data");
     } finally {
       setLoading(false);
@@ -53,6 +53,7 @@ const DashBoard = () => {
 
   if (loading || !dashboardData) return <Loading />;
 
+  // dashboard details
   const dashboardCards = [
     {
       title: "Total Bookings",

@@ -19,7 +19,7 @@ import { SignIn } from '@clerk/clerk-react'
 import Loading from './components/Loading'
 
 const App = () => {
-  const isAdminRoute = useLocation().pathname.startsWith('/admin')// Assuming admin routes start with '/admin'
+  const isAdminRoute = useLocation().pathname.startsWith('/admin')
 
   const { user } = useAppContext()
 

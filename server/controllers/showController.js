@@ -51,7 +51,7 @@ export const addShow = async (req, res) => {
     let movie = await Movie.findById(movieId);
 
     if (!movie) {
-      // fetch movie details from OMDB by IMDb ID
+      // fetch movie details from OMDB 
       const { data: movieData } = await axios.get('http://www.omdbapi.com/', {
         params: {
           i: movieId,
@@ -69,14 +69,14 @@ export const addShow = async (req, res) => {
         title: movieData.Title,
         overview: movieData.Plot,
         poster_path: movieData.Poster,
-        backdrop_path: '', // Not available from OMDB
+        backdrop_path: '', 
         genres: movieData.Genre?.split(', ') || [],
         casts: movieData.Actors?.split(', ') || [],
         release_date: movieData.Released,
         original_language: movieData.Language,
-        tagline: '', // Not available
+        tagline: '', 
         vote_average: parseFloat(movieData.imdbRating) || 0,
-        runtime: parseInt(movieData.Runtime?.split(" ")[0]) || 90, // fallback to 90 mins
+        runtime: parseInt(movieData.Runtime?.split(" ")[0]) || 90, 
       };
 
       movie = await Movie.create(movieDetails);

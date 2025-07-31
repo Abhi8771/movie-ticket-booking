@@ -14,7 +14,7 @@ export const stripeWebhooks = async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (error) {
-    console.error("❌ Webhook verification failed:", error.message);
+    console.error("Webhook verification failed:", error.message);
     return res.status(400).send(`Webhook Error: ${error.message}`);
   }
 
@@ -28,7 +28,7 @@ export const stripeWebhooks = async (req, res) => {
           isPaid: true,
           paymentLink: ''
         });
-        console.log(`✅ Booking ${bookingId} marked as paid`);
+        console.log(`Booking ${bookingId} marked as paid`);
       }
     }
 

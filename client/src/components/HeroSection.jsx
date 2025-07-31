@@ -11,8 +11,8 @@ const slides = [
     year: '2025',
     duration: '2h 10m',
     description: 'Dinosaurs are brought back once again, but this time they’ve evolved beyond control. A new generation must survive the rebirth.',
-    image: '/background1.jpg', // Replace with actual Jurassic Park background
-    logo: assets.marvelLogo // Replace with correct logo if available
+    image: '/background1.jpg', 
+    logo: assets.marvelLogo 
   },
   {
     title: 'Until Dawn',
@@ -20,8 +20,8 @@ const slides = [
     year: '2023',
     duration: '1h 50m',
     description: 'Trapped on a remote mountain, a group of friends must survive until dawn as they’re hunted by something terrifying.',
-    image: '/background2.jpg', // Replace with Until Dawn-style background
-    logo: assets.marvelLogo // Replace with appropriate logo if available
+    image: '/background2.jpg', 
+    logo: assets.marvelLogo 
   },
   {
     title: 'The Accountant 2',
@@ -29,8 +29,8 @@ const slides = [
     year: '2024',
     duration: '2h 5m',
     description: 'Christian Wolff returns for another high-stakes mission involving corporate corruption, global money trails, and a deadly conspiracy.',
-    image: '/background3.jpg', // Replace with Accountant 2-style background
-    logo: assets.marvelLogo // Replace with proper logo
+    image: '/background3.jpg', 
+    logo: assets.marvelLogo 
   }
 ]
 

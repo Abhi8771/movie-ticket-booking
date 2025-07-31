@@ -23,7 +23,7 @@ export const getDashboardData = async (req, res) => {
             totalRevenue: bookings.reduce((acc, booking) => acc + booking.amount, 0),
             activeShows,
             totalUser
-            // Add other dashboard fields here as needed
+           
         };
 
         res.json({ success: true, dashboardData });
@@ -59,21 +59,18 @@ export const getAllBookings = async (req, res) => {
 
     }
 }
-
+// delete a show
 export const deleteShow = async (req, res) => {
   try {
     const showId = req.params.id;
 
-    // Step 1: Check if show exists
     const show = await Show.findById(showId);
     if (!show) {
       return res.status(404).json({ success: false, message: "Show not found" });
     }
 
-    // Step 2: Delete the show
     await Show.findByIdAndDelete(showId);
 
-    // Step 3 (Optional): Delete all bookings linked to the deleted show
     await Booking.deleteMany({ show: showId });
 
     return res.status(200).json({ success: true, message: "Show and related bookings deleted successfully" });

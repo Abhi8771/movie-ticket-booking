@@ -7,7 +7,7 @@ const BlurCircle = ({ top = "auto", left = "auto", right = "auto", bottom = "aut
         left,
         right,
         bottom,
-        backgroundColor: "#8F00FF", // Neon violet
+        backgroundColor: "#8F00FF", 
         filter: "blur(100px) saturate(200%)",
         opacity: 0.8,
       }}

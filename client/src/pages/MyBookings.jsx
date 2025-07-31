@@ -9,12 +9,12 @@ import { useAppContext } from '../context/AppContext';
 const MyBookings = () => {
   const currency = import.meta.env.VITE_CURRENCY;
   const { axios, getToken, user } = useAppContext();
-  const location = useLocation(); // ✅ React Router hook to access query params
+  const location = useLocation(); 
 
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ✅ Fetch user's bookings
+  // Get user's bookings
   const getMyBookings = async () => {
     try {
       const { data } = await axios.get('/api/user/bookings', {
@@ -30,14 +30,14 @@ const MyBookings = () => {
     setIsLoading(false);
   };
 
-  // ✅ Initial fetch when user is available
+  //Initial fetch when user is available
   useEffect(() => {
     if (user) {
       getMyBookings();
     }
   }, [user]);
 
-  // ✅ Re-fetch if Stripe redirects with ?payment=success
+  //Re-fetch if Stripe redirects with ?payment=success
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     if (query.get('payment') === 'success') {
