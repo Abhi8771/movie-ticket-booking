@@ -8,4 +8,4 @@ const isoTimeFormat = (dateTime) => {
     return localTime
 }
 
-export default isoTimeFormat
+export default isoTimeFormat ;
