@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Loading from '../../components/Loading';
-import Title from '../../components/admin/title';
+import Title from '../../components/admin/Title';
 import { CheckIcon, DeleteIcon, StarsIcon } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import toast from 'react-hot-toast';

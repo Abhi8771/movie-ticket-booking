@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Loading from "../../components/Loading";
-import Title from "../../components/admin/title";
+import Title from "../../components/admin/Title";
 import BlurCircle from "../../components/BlurCircle";
 import dateFormat from "../../lib/dateFormat";
 import { useAppContext } from "../../context/AppContext";
