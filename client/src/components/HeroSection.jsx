@@ -15,13 +15,13 @@ const slides = [
     logo: assets.marvelLogo 
   },
   {
-    title: 'Until Dawn',
-    genres: 'Horror | Mystery | Drama',
-    year: '2023',
-    duration: '1h 50m',
-    description: 'Trapped on a remote mountain, a group of friends must survive until dawn as they’re hunted by something terrifying.',
-    image: '/background2.jpg', 
-    logo: assets.marvelLogo 
+  title: 'Avatar: Fire and Ash',
+  genres: 'Action | Adventure | Sci-Fi',
+  year: '2025',
+  duration: '3h 5m',
+  description: 'As Pandora faces a scorched invasion, Jake Sully and Neytiri must unite rival clans and confront an ancient force buried beneath the ash to protect their world from extinction.',
+  image: '/avatar1.jpg', // Replace with imported image if you prefer
+  logo: assets.marvelLogo 
   },
   {
     title: 'The Accountant 2',
