@@ -111,7 +111,7 @@ export const stripeWebhooks = async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (error) {
-    console.error("❌ Webhook verification failed:", error.message);
+    console.error("Webhook verification failed:", error.message);
     return res.status(400).send(`Webhook Error: ${error.message}`);
   }
 
@@ -121,7 +121,7 @@ export const stripeWebhooks = async (req, res) => {
       const bookingId = session.metadata?.bookingId;
 
       if (!bookingId) {
-        console.warn("⚠️ No bookingId in session metadata");
+        console.warn("No bookingId in session metadata");
         return res.status(400).json({ error: 'Missing bookingId in metadata' });
       }
 
@@ -131,18 +131,18 @@ export const stripeWebhooks = async (req, res) => {
       });
 
       if (!updated) {
-        console.error("❌ Booking not found:", bookingId);
+        console.error("Booking not found:", bookingId);
         return res.status(404).json({ error: 'Booking not found' });
       }
 
-      console.log(`✅ Booking ${bookingId} marked as paid`);
+      console.log(`Booking ${bookingId} marked as paid`);
     } else {
-      console.log("ℹ️ Unhandled event type:", event.type);
+      console.log("Unhandled event type:", event.type);
     }
 
     res.status(200).json({ received: true });
   } catch (err) {
-    console.error("🔥 Webhook processing error:", err);
+    console.error("Webhook processing error:", err);
     res.status(500).send("Internal Server Error");
   }
 };

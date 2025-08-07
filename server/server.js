@@ -26,7 +26,7 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), strip
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: "https://movie-ticket-booking-a9h1.vercel.app", // your frontend domain
+  origin: "https://movie-ticket-booking-a9h1.vercel.app", 
   credentials: true,
 }));
 app.use(clerkMiddleware())

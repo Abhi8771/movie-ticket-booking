@@ -164,7 +164,7 @@ export const createBooking = async (req, res) => {
           product_data: {
             name: showData.movie.title,
           },
-          unit_amount: Math.floor(amount * 100), // Stripe expects amount in cents
+          unit_amount: Math.floor(amount * 100), 
         },
         quantity: 1,
       },
@@ -176,7 +176,7 @@ export const createBooking = async (req, res) => {
       line_items,
       mode: "payment",
       metadata: {
-        bookingId: booking._id.toString(), // ✅ used by Stripe Webhook
+        bookingId: booking._id.toString(), 
       },
     });
 
