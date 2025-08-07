@@ -1,10 +1,10 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import { stripeWebhooks } from '../controllers/stripeWebhooks.js';
+// import express from 'express';
+// import bodyParser from 'body-parser';
+// import { stripeWebhooks } from '../controllers/stripeWebhooks.js';
 
-const router = express.Router();
+// const router = express.Router();
 
 
-router.post('/webhook', bodyParser.raw({ type: 'application/json' }), stripeWebhooks);
+// router.post('/webhook', bodyParser.raw({ type: 'application/json' }), stripeWebhooks);
 
-export default router;
+// export default router;
