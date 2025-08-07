@@ -18,7 +18,9 @@ const PORT = process.env.PORT || 3000;
 await connectDB()
 
 // Stripe Webhooks route
-app.use('/api/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);
+// app.use('/api/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhooks);
+
 
 
 // Middleware
