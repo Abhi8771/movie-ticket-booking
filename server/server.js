@@ -23,7 +23,10 @@ app.use('/api/stripe', express.raw({ type: 'application/json' }), stripeWebhooks
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: "https://movie-ticket-booking-a9h1.vercel.app", // your frontend domain
+  credentials: true,
+}));
 app.use(clerkMiddleware())
 
 // API Routes
