@@ -29,6 +29,9 @@ app.use(cors({
   origin: "https://movie-ticket-booking-a9h1.vercel.app", 
   credentials: true,
 }));
+
+// app.use(cors())
+
 app.use(clerkMiddleware())
 
 // API Routes
