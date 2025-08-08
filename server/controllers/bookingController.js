@@ -239,20 +239,20 @@ export const createBooking = async (req, res) => {
     const { showId, selectedSeats } = req.body;
     const { origin } = req.headers;
 
-    // 1️⃣ Check seat availability
+    // Check seat availability
     const isAvailable = await checkSeatsAvailability(showId, selectedSeats);
     if (!isAvailable) {
       return res.json({ success: false, message: "Selected seat not available" });
     }
 
-    // 2️⃣ Get show details
+    // Get show details
     const showData = await Show.findById(showId).populate("movie");
     const amount = showData.showPrice * selectedSeats.length;
 
-    // 3️⃣ Fetch Clerk user details
+    //  Fetch Clerk user details
     const clerkUser = await users.getUser(userId);
 
-    // 4️⃣ Create booking with userName & userEmail stored
+    // Create booking with userName & userEmail stored
     const booking = await Booking.create({
       user: userId,
       userName: `${clerkUser.firstName} ${clerkUser.lastName}`,
@@ -263,14 +263,14 @@ export const createBooking = async (req, res) => {
       isPaid: false, // default until Stripe webhook confirms payment
     });
 
-    // 5️⃣ Mark seats as occupied
+    // Mark seats as occupied
     selectedSeats.forEach((seat) => {
       showData.occupiedSeats[seat] = userId;
     });
     showData.markModified("occupiedSeats");
     await showData.save();
 
-    // 6️⃣ Create Stripe Checkout session
+    // Create Stripe Checkout session
     const line_items = [
       {
         price_data: {
@@ -297,7 +297,7 @@ export const createBooking = async (req, res) => {
     booking.paymentLink = session.url;
     await booking.save();
 
-    // 7️⃣ Schedule fallback payment check via Inngest
+    // Schedule fallback payment check via Inngest
     await inngest.send({
       name: "app/checkpayment",
       data: { bookingId: booking._id.toString() },

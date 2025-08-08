@@ -195,7 +195,7 @@ export const stripeWebhooks = async (req, res) => {
         return res.status(404).json({ error: "Booking not found" });
       }
 
-      console.log(`✅ Booking ${bookingId} marked as paid`);
+      console.log(`Booking ${bookingId} marked as paid`);
 
       // Generate PDF ticket
       const pdfBuffer = await generatePdfTicket({
@@ -209,9 +209,9 @@ export const stripeWebhooks = async (req, res) => {
 
       // Send email with PDF
       await sendEmail({
-        to: booking.userEmail,
-        subject: `Your Ticket for ${booking.show.movie.title}`,
-        html: `<h3>Hi ${booking.userName.split(" ")[0]},</h3>
+        to: Booking.userEmail,
+        subject: `Your Ticket for ${Booking.show.movie.title}`,
+        html: `<h3>Hi ${Booking.userName.split(" ")[0]},</h3>
                <p>Thank you for your booking! Your ticket is attached below.</p>`,
         attachments: [
           {
@@ -221,7 +221,7 @@ export const stripeWebhooks = async (req, res) => {
         ],
       });
 
-      console.log(`📧 Ticket email sent to ${booking.userEmail}`);
+      console.log(`Ticket email sent to ${Booking.userEmail}`);
     }
 
     res.status(200).json({ received: true });
