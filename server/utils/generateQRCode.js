@@ -1,4 +1,3 @@
-// server/utils/generateQRCode.js
 import QRCode from "qrcode";
 
 export const generateQRCodeDataURL = async (text) => {
