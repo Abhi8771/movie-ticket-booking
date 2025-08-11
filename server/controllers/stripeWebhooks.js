@@ -134,7 +134,7 @@ export const stripeWebhooks = async (req, res) => {
         : null;
 
       const showDate = showDateTime
-        ? showDateTime.toLocaleDateString("en-US", {
+        ? showDateTime.toLocaleDateString("en-IN", {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -142,7 +142,7 @@ export const stripeWebhooks = async (req, res) => {
         : "Unknown Date";
 
       const showTime = showDateTime
-        ? showDateTime.toLocaleTimeString("en-US", {
+        ? showDateTime.toLocaleTimeString("en-IN", {
             hour: "2-digit",
             minute: "2-digit",
             hour12: true,
