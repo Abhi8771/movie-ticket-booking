@@ -1,3 +1,4 @@
+// 
 import nodemailer from "nodemailer";
 
 export const sendEmail = async ({ to, subject, html, attachments = [] }) => {
@@ -6,7 +7,7 @@ export const sendEmail = async ({ to, subject, html, attachments = [] }) => {
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, 
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -17,9 +18,8 @@ export const sendEmail = async ({ to, subject, html, attachments = [] }) => {
       html,
       attachments,
     });
-
-    console.log(`Email sent to ${to}`);
   } catch (error) {
     console.error("Email sending failed:", error);
+    throw error;
   }
 };
