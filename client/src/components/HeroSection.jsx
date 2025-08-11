@@ -21,17 +21,18 @@ const slides = [
   duration: '3h 5m',
   description: 'As Pandora faces a scorched invasion, Jake Sully and Neytiri must unite rival clans and confront an ancient force buried beneath the ash to protect their world from extinction.',
   image: '/avatar1.jpg', // Replace with imported image if you prefer
-  logo: assets.marvelLogo 
+  logo: assets.avatarlogo
   },
   {
-    title: 'The Accountant 2',
-    genres: 'Crime | Thriller | Action',
-    year: '2024',
-    duration: '2h 5m',
-    description: 'Christian Wolff returns for another high-stakes mission involving corporate corruption, global money trails, and a deadly conspiracy.',
-    image: '/background3.jpg', 
-    logo: assets.marvelLogo 
-  }
+  title: 'Ballerina',
+  genres: 'Action | Crime | Thriller',
+  year: '2025',
+  duration: '2h 5m',
+  description: 'Eve Macarro, a ballerina-turned-assassin trained within the Ruska Roma, embarks on a high-stakes mission to avenge her father\'s murder. Positioned between the events of John Wick: Chapter 3 – Parabellum and Chapter 4, the film blends stylized ultraviolence, dark underworld mythology, and inventive action sequences.',
+  image: '/ballerina.jpg',
+  logo: assets.ballerina
+}
+
 ]
 
 
