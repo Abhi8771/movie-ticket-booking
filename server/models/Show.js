@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const showSchema = new mongoose.Schema(
     {
         movie:{
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
             required: true,
             ref:'Movie'
         },
