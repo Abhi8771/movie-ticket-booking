@@ -1,6 +1,8 @@
 import axios from 'axios';
 import Movie from '../models/Movie.js';
 import Show from '../models/Show.js';
+import { inngest } from '../inngest/index.js';
+
 
 // API to get now playing movies (simulated with popular titles)
 export const getNowPlayingMovies = async (req, res) => {
@@ -118,6 +120,12 @@ export const addShow = async (req, res) => {
     } else {
       return res.status(400).json({ success: false, message: 'No valid shows to add' });
     }
+
+    // Trigger Inngest function to notify users about new shows
+    await inngest.send({
+      name:"app/movie.added",
+      data: {movieTitle: movie.title}
+    })
 
     return res.json({ success: true, message: 'Shows added successfully' });
   } catch (error) {
