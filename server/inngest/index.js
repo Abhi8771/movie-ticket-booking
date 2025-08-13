@@ -211,7 +211,7 @@ const sendNewMovieEmail = inngest.createFunction(
           <h2 style="color: #2c3e50;">Hi ${userName},</h2>
           <p>We are excited to inform you that a new movie, <strong>${movieTitle}</strong>, has been added to our collection. Check it out now!</p>
           <h3 style="color: #2c3e50;">"${movieTitle}"</h3>
-          <p><a href="https://yourwebsite.com/movies/${movieId}">Visit Our Website</a></p>
+          <p><a href="https://movie-ticket-booking-a9h1.vercel.app">Visit Our Website</a></p>
           <br/>
           <p>Thank you for being a valued customer!</p>
         </div>
