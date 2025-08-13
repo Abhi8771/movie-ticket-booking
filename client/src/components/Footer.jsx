@@ -1,5 +1,6 @@
 import React from 'react';
 import { assets } from '../assets/assets';
+import footerpng from '../assets/footerpng.png';
 
 const Footer = () => {
   return (
@@ -40,7 +41,7 @@ const Footer = () => {
       {/* Right Side - Image */}
       <img
         className="w-52 md:w-64 mt-4 md:mt-0 md:self-end rounded-xl shadow-lg -mb-4"
-  src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/appDownload/excitedWomenImage.png"
+  src={footerpng}
   alt="excitedWomenImage"
       />
     </footer>
