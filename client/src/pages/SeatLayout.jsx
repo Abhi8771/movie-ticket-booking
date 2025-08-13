@@ -7,7 +7,7 @@ import isoTimeFormat from '../lib/isoTimeFormat';
 import BlurCircle from '../components/BlurCircle';
 import toast from 'react-hot-toast';
 import { useAppContext } from '../context/AppContext';
-import screenImage from '../assets/screenImage.svg'; 
+import screenImage from '../assets/screenImage.svg'; // Assuming you have a screen image in your assets
 
 const SeatLayout = () => {
   const groupRows = [['A', 'B'], ['C', 'D'], ['E', 'F'], ['G', 'H'], ['I', 'J']];
