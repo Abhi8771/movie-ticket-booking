@@ -7,6 +7,7 @@ import isoTimeFormat from '../lib/isoTimeFormat';
 import BlurCircle from '../components/BlurCircle';
 import toast from 'react-hot-toast';
 import { useAppContext } from '../context/AppContext';
+import screenImage from '../assets/screenImage.svg'; 
 
 const SeatLayout = () => {
   const groupRows = [['A', 'B'], ['C', 'D'], ['E', 'F'], ['G', 'H'], ['I', 'J']];
@@ -156,7 +157,7 @@ const SeatLayout = () => {
         <BlurCircle top="0px" left="0px" />
 
         <h1 className="text-2xl font-semibold mb-4">Select Your Seat</h1>
-        <img src={assets.screenImage.svg} alt="screen" />
+        <img src={screenImage} alt="screen" />
         <p className="text-gray-400 text-sm mb-6">SCREEN SIDE</p>
 
         <div className="flex flex-col items-center mt-10 text-xs text-gray-300">
