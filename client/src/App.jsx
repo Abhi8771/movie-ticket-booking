@@ -17,6 +17,7 @@ import ListBookings from './pages/admin/ListBookings'
 import { useAppContext } from './context/AppContext'
 import { SignIn } from '@clerk/clerk-react'
 import Loading from './components/Loading'
+import ChatBot from './components/ChatBot'
 
 const App = () => {
   const isAdminRoute = useLocation().pathname.startsWith('/admin')
@@ -46,6 +47,7 @@ const App = () => {
       <Route path='list-bookings' element={<ListBookings/>}/>
       </Route>
     </Routes>
+    <ChatBot />
     {!isAdminRoute && <Footer/>}
    
     </>
