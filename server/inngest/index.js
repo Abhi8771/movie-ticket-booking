@@ -83,26 +83,6 @@ const releaseSeatsAndDeleteBooking = inngest.createFunction(
 
 )
 
-// // Inngest Function to send email to user when booking is confirmed
-
-// const sendBookingConfirmationEmail = inngest.createFunction({id: "send-booking-confirmation-email"},
-//   {event: "app/show.booked"},
-//   async (event, step) => {
-//     const {bookingId} = event.data;
-//     const booking = await Booking.findById(bookingId).populate({
-//       path: 'show',
-//       populate: {path: "movie", model: "Movie"}
-//     }).populate('user');
-
-//   }
-// )
-
-
-
-// inngest functions to send emails for booking confirmation, reminders, and new movie notifications
-
-
-
 // Inngest Function to send email when booking is confirmed
 const sendBookingConfirmationEmail = inngest.createFunction(
   { id: "send-booking-confirmation-email" },
@@ -133,8 +113,8 @@ const sendReminderEmail = inngest.createFunction(
   { cron: "0 * * * *" }, // runs every hour
   async ({ step }) => {
     const now = new Date();
-    const windowStart = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
-    const windowEnd = new Date(windowStart.getTime() + 60 * 60 * 1000); // 1-hour window
+    const windowStart = new Date(now.getTime() + 2 * 60 * 60 * 1000); 
+    const windowEnd = new Date(windowStart.getTime() + 60 * 60 * 1000); 
 
     // Prepare reminder tasks
     const reminderTasks = await step.run("prepare-reminder-tasks", async () => {
