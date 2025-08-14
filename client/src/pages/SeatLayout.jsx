@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { useAppContext } from '../context/AppContext';
 import screenImage from '../assets/screenImage.svg'; 
 import timeFormat from '../lib/timeFormat';
+import dateFormat from '../lib/dateFormat';
 
 const SeatLayout = () => {
   const groupRows = [['A', 'B'], ['C', 'D'], ['E', 'F'], ['G', 'H'], ['I', 'J']];
@@ -141,7 +142,7 @@ const SeatLayout = () => {
                 }`}
               >
                 <ClockIcon className="w-4 h-4" />
-                <p className="text-sm">{timeFormat(item.time)}</p>
+                <p className="text-sm">{dateFormat(item.time)}</p>
               </div>
             ))
           ) : (
