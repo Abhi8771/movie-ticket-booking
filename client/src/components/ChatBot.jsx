@@ -9,7 +9,6 @@ export default function ChatBot() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -23,8 +22,8 @@ export default function ChatBot() {
     setLoading(true);
 
     try {
-      // Adjust URL if your backend is on another server
-      const res = await fetch(`${import.meta.env.VITE_BASE_URL || ""}/api/chat/ask`, {
+      const baseUrl = (import.meta.env.VITE_BASE_URL || "").replace(/\/$/, "");
+      const res = await fetch(`${baseUrl}/api/chat/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: input }),
@@ -48,7 +47,6 @@ export default function ChatBot() {
 
   return (
     <div>
-      {/* Floating Chat Button */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
@@ -58,16 +56,13 @@ export default function ChatBot() {
         </button>
       )}
 
-      {/* Chat Window */}
       {open && (
         <div className="fixed bottom-5 right-5 w-80 h-96 bg-white shadow-xl rounded-lg flex flex-col border">
-          {/* Header */}
           <div className="flex justify-between items-center p-3 bg-blue-600 text-white rounded-t-lg">
             <span>AI Assistant</span>
             <button onClick={() => setOpen(false)}>✖</button>
           </div>
 
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50">
             {messages.map((msg, index) => (
               <div
@@ -85,7 +80,6 @@ export default function ChatBot() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
           <div className="p-2 border-t flex">
             <input
               type="text"
