@@ -50,7 +50,7 @@ export default function ChatBot() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-5 right-5 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition"
+          className="fixed bottom-5 right-5 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition"
         >
           💬
         </button>
@@ -58,7 +58,7 @@ export default function ChatBot() {
 
       {open && (
         <div className="fixed bottom-5 right-5 w-80 h-96 bg-white shadow-xl rounded-lg flex flex-col border">
-          <div className="flex justify-between items-center p-3 bg-blue-600 text-white rounded-t-lg">
+          <div className="flex justify-between items-center p-3 bg-primary-600 text-white rounded-t-lg">
             <span>AI Assistant</span>
             <button onClick={() => setOpen(false)}>✖</button>
           </div>
