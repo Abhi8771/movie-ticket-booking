@@ -1,56 +1,3 @@
-// import express from 'express';
-// import cors from 'cors';
-// import 'dotenv/config';
-// import connectDB from './Configs/db.js';
-// import { clerkMiddleware } from '@clerk/express';
-// import { serve } from "inngest/express";
-// import { inngest, functions } from "./inngest/index.js";
-// import showRouter from './routes/showRoutes.js';
-// import bookingRouter from './routes/bookingRoutes.js';
-// import adminRouter from './routes/adminRoutes.js';
-// import userRouter from './routes/userRoutes.js';
-// import { stripeWebhooks } from './controllers/stripeWebhooks.js';
-// import chatRoutes from "./routes/chatRoutes.js";
-
-
-// const app = express();
-// const PORT = process.env.PORT || 3000;
-
-// await connectDB()
-
-// // Stripe Webhooks route
-// // app.use('/api/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);
-// app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhooks);
-
-
-
-// // Middleware
-// app.use(express.json());
-// app.use(cors({
-//   origin: "https://movie-ticket-booking-a9h1.vercel.app", 
-//   credentials: true,
-// }));
-
-// // app.use(cors())
-
-// app.use(clerkMiddleware())
-
-// // API Routes
-// app.get('/', (req, res) => {
-//   res.send('Server is live!');
-// });
-
-// app.use('/api/inngest', serve({ client: inngest, functions }));
-// app.use('/api/shows', showRouter)
-// app.use('/api/booking', bookingRouter)
-// app.use('/api/admin', adminRouter)
-// app.use('/api/user', userRouter)
-// app.use("/api/chat", chatRoutes);
-
-// app.listen(PORT, () => {
-//   console.log(`Server is running at http://localhost:${PORT}`);
-// });
-
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
@@ -65,44 +12,42 @@ import userRouter from './routes/userRoutes.js';
 import { stripeWebhooks } from './controllers/stripeWebhooks.js';
 import chatRoutes from "./routes/chatRoutes.js";
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-await connectDB();
+await connectDB()
 
 // Stripe Webhooks route
+// app.use('/api/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhooks);
 
-const allowedOrigin = "https://movie-ticket-booking-a9h1.vercel.app";
 
-app.use(cors({
-  origin: allowedOrigin,
-  credentials: true
-}));
 
-// Handle preflight OPTIONS requests globally
-app.options("*", cors({
-  origin: allowedOrigin,
-  credentials: true
-}));
-
-// Parse JSON
+// Middleware
 app.use(express.json());
+app.use(cors({
+  origin: "https://movie-ticket-booking-a9h1.vercel.app", 
+  credentials: true,
+}));
 
-// Clerk auth middleware
-app.use(clerkMiddleware());
+// app.use(cors())
+
+app.use(clerkMiddleware())
 
 // API Routes
-app.get('/', (req, res) => res.send('Server is live!'));
+app.get('/', (req, res) => {
+  res.send('Server is live!');
+});
 
 app.use('/api/inngest', serve({ client: inngest, functions }));
-app.use('/api/shows', showRouter);
-app.use('/api/booking', bookingRouter);
-app.use('/api/admin', adminRouter);
-app.use('/api/user', userRouter);
+app.use('/api/shows', showRouter)
+app.use('/api/booking', bookingRouter)
+app.use('/api/admin', adminRouter)
+app.use('/api/user', userRouter)
 app.use("/api/chat", chatRoutes);
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
+
