@@ -60,82 +60,103 @@
 
 import express from "express";
 import OpenAI from "openai";
+import Movie from "../models/Movie.js";
 import Show from "../models/Show.js";
 import Booking from "../models/Booking.js";
-import Movie from "../models/Movie.js";
 
 const router = express.Router();
 
-// Initialize OpenAI client (OpenRouter with Claude 3.5 Sonnet)
 const openrouter = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
 });
 
+// AI Chat Query
 router.post("/ask", async (req, res) => {
   const { question } = req.body;
 
   try {
-    // --- 1. Fetch all data you may need in structured format ---
-    const moviesNowShowing = await Movie.find({ isNowShowing: true }).select("title description posterUrl duration rating");
-    const allShows = await Show.find().populate("movie", "title").select("time availableSeats screenNumber");
-    
-    // (Optional) If you want to fetch bookings:
-    // const allBookings = await Booking.find().populate("show").populate("user");
+    const movies = await Movie.find();
+    const shows = await Show.find().populate("movie", "title");
 
-    // Prepare structured JSON for the AI
     const dbInfo = {
-      moviesNowShowing: moviesNowShowing.map(m => ({
+      movies: movies.map(m => ({
+        id: m._id,
         title: m.title,
-        description: m.description,
-        posterUrl: m.posterUrl,
-        duration: m.duration,
-        rating: m.rating,
+        overview: m.overview,
+        poster: m.poster_path,
+        releaseDate: m.release_date,
+        rating: m.vote_average,
+        runtime: m.runtime,
+        genres: m.genres,
       })),
-      shows: allShows.map(s => ({
-        movie: s.movie.title,
-        time: s.time,
-        availableSeats: s.availableSeats,
-        screen: s.screenNumber
-      })),
-      // bookings: ... if needed
+      shows: shows.map(s => ({
+        id: s._id,
+        movie: s.movie?.title,
+        showDateTime: s.showDateTime,
+        price: s.showPrice,
+        availableSeats: 100 - Object.keys(s.occupiedSeats || {}).length,
+        occupiedSeats: s.occupiedSeats,
+      }))
     };
 
-    // --- 2. Build prompt for AI ---
     const prompt = `
-You are an assistant for a movie ticket booking website. 
-You ONLY answer using the provided database JSON. 
-If the user asks about something not in the database, say "I don't have information on that."
-
+You are a helpful assistant for a movie ticket booking website. Use ONLY the JSON data below to answer.
 User question: "${question}"
 Database JSON:
 ${JSON.stringify(dbInfo, null, 2)}
-
-Instructions:
-- If user asks about "currently playing movies", list movies from moviesNowShowing.
-- If user asks about showtimes or seats, give details from shows.
-- If no info is available, clearly say so.
-- Respond concisely and clearly.
+If no information is found, respond: "I don't have information on that."
 `;
 
-    // --- 3. Call AI model ---
     const aiRes = await openrouter.chat.completions.create({
       model: "anthropic/claude-3.5-sonnet",
       messages: [
         { role: "system", content: "You are a helpful assistant for a movie booking service." },
         { role: "user", content: prompt }
       ],
-      max_tokens: 250,
+      max_tokens: 300,
     });
 
     const answer = aiRes.choices[0].message.content.trim();
+    res.json({ answer, rawData: dbInfo });
 
-    // --- 4. Return final answer ---
-    res.json({ answer, rawData: dbInfo }); // rawData helps for debugging if needed
-
-  } catch (error) {
-    console.error("Chatbot error:", error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ answer: "Error fetching data or AI response." });
+  }
+});
+
+// Seat Booking
+router.post("/book", async (req, res) => {
+  const { showId, seats, userName, userEmail, user } = req.body;
+  try {
+    const show = await Show.findById(showId);
+    if (!show) return res.status(404).json({ success: false, message: "Show not found" });
+
+    // Check availability
+    const occupied = show.occupiedSeats || {};
+    for (let s of seats) if (occupied[s]) return res.status(400).json({ success: false, message: `Seat ${s} already booked` });
+
+    // Mark seats as occupied
+    seats.forEach(s => occupied[s] = true);
+    show.occupiedSeats = occupied;
+    await show.save();
+
+    const booking = new Booking({
+      user: user || "guest",
+      userName,
+      userEmail,
+      show: showId,
+      amount: show.showPrice * seats.length,
+      bookedSeats: seats,
+      isPaid: true // can integrate real payment
+    });
+    await booking.save();
+
+    res.json({ success: true, message: `Seats booked successfully: ${seats.join(", ")}`, show });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Booking failed" });
   }
 });
 
