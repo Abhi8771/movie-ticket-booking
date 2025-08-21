@@ -22,3 +22,4 @@ const isoTimeFormat = (dateTime) => {
 }
 
 
+export default isoTimeFormat;

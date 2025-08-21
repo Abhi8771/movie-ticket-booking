@@ -101,8 +101,8 @@ export const addShow = async (req, res) => {
       for (const time of show.time) {
         // Construct ISO datetime string; assumes time like 'HH:mm'
         const dateTimeString = `${show.date}T${time}:00Z`; // Adding seconds for valid ISO
-        const dateTime = new Date(`${show.date}T${time}:00+05:30`);
-        // const dateTime = new Date(dateTimeString);
+        // const dateTime = new Date(`${show.date}T${time}:00+05:30`);
+        const dateTime = new Date(dateTimeString);
         if (isNaN(dateTime.getTime())) {
           return res.status(400).json({ success: false, message: `Invalid date/time: ${dateTimeString}` });
         }
