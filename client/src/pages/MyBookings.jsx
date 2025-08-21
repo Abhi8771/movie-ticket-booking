@@ -77,7 +77,7 @@ const MyBookings = () => {
                 {timeFormat(item.show.movie.runtime)}
               </p>
               <p className='text-gray-400 text-sm mt-auto'>
-                {(item.show.showDateTime)}
+                {isoTimeFormat(item.show.showDateTime)}
               </p>
             </div>
           </div>

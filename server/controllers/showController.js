@@ -58,7 +58,7 @@ export const addShow = async (req, res) => {
     let movie = await Movie.findById(movieId);
 
     if (!movie) {
-      // Fetch movie details from OMDB by imdbID (movieId)
+      // Fetch movie details from OMDB by movieId
       const { data: movieData } = await axios.get('http://www.omdbapi.com/', {
         params: {
           i: movieId,
@@ -77,12 +77,12 @@ export const addShow = async (req, res) => {
         title: movieData.Title,
         overview: movieData.Plot,
         poster_path: movieData.Poster,
-        backdrop_path: '', // OMDB does not provide backdrop; keep empty or fetch elsewhere
+        backdrop_path: '', 
         genres: movieData.Genre?.split(', ') || [],
         casts: movieData.Actors?.split(', ') || [],
         release_date: movieData.Released,
         original_language: movieData.Language,
-        tagline: '', // OMDB does not provide tagline
+        tagline: '', 
         vote_average: parseFloat(movieData.imdbRating) || 0,
         runtime: parseInt(movieData.Runtime?.split(' ')[0]) || 90,
       };
@@ -100,7 +100,7 @@ export const addShow = async (req, res) => {
 
       for (const time of show.time) {
         // Construct ISO datetime string; assumes time like 'HH:mm'
-        const dateTimeString = `${show.date}T${time}:00`; // Adding seconds for valid ISO
+        const dateTimeString = `${show.date}T${time}:00Z`; // Adding seconds for valid ISO
         const dateTime = new Date(dateTimeString);
         if (isNaN(dateTime.getTime())) {
           return res.status(400).json({ success: false, message: `Invalid date/time: ${dateTimeString}` });
