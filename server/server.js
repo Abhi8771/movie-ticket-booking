@@ -73,17 +73,17 @@ await connectDB();
 // Stripe Webhooks route
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhooks);
 
-// --- CORS middleware ---
 const allowedOrigin = "https://movie-ticket-booking-a9h1.vercel.app";
+
 app.use(cors({
   origin: allowedOrigin,
-  credentials: true,
+  credentials: true
 }));
 
-// Handle preflight requests (OPTIONS)
+// Handle preflight OPTIONS requests globally
 app.options("*", cors({
   origin: allowedOrigin,
-  credentials: true,
+  credentials: true
 }));
 
 // Parse JSON
