@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
-import Show from "../models/showModel.js";
-import Booking from "../models/bookingModel.js";
+import Show from "../models/Show.js";
+import Booking from "../models/Booking.js";
 
 // ========== 1. AI QUESTION HANDLER ==========
 export const askQuestion = async (req, res) => {
