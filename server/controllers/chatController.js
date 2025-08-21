@@ -173,22 +173,30 @@ export const askQuestion = async (req, res) => {
       const now = new Date();
       const upcomingShows = await Show.find({ showDateTime: { $gte: now } })
         .populate("movie", "title poster overview rating runtime")
-        .limit(5);
+        .limit(10);
 
       if (!upcomingShows.length) {
         return res.json({ type: "text", answer: "No movies are currently scheduled." });
       }
 
-      const movies = upcomingShows.map(show => ({
-        id: show._id,
-        title: show.movie.title,
-        poster: show.movie.poster,
-        overview: show.movie.overview || "No description available",
-        rating: show.movie.rating || "N/A",
-        runtime: show.movie.runtime || "N/A",
-        showDateTime: show.showDateTime,
-        price: show.showPrice || 0,
-      }));
+      // Remove duplicates by movie title
+      const uniqueMoviesMap = new Map();
+      upcomingShows.forEach(show => {
+        if (!uniqueMoviesMap.has(show.movie.title)) {
+          uniqueMoviesMap.set(show.movie.title, {
+            id: show._id,
+            title: show.movie.title,
+            poster: show.movie.poster,
+            overview: show.movie.overview || "No description available",
+            rating: show.movie.rating || "N/A",
+            runtime: show.movie.runtime || "N/A",
+            showDateTime: show.showDateTime,
+            price: show.showPrice || 0,
+          });
+        }
+      });
+
+      const movies = Array.from(uniqueMoviesMap.values());
 
       return res.json({
         type: "movies",
@@ -209,7 +217,7 @@ export const askQuestion = async (req, res) => {
 
           return {
             id: show._id,
-            movie: show.movieTitle,
+            movie: show.movieTitle || "Unknown",
             showDateTime: show.showDateTime,
             price: show.showPrice || 0,
             availableSeats: available,
@@ -267,13 +275,12 @@ export const bookSeats = async (req, res) => {
       });
     }
 
-    // Mark seats as occupied in the show document
+    // Mark seats as occupied
     const occupiedSeats = show.occupiedSeats || {};
     seats.forEach(seat => occupiedSeats[seat] = true);
     show.occupiedSeats = occupiedSeats;
     await show.save();
 
-    // Create booking
     const booking = new Booking({
       user: userId || "Guest",
       userName: userName || "Guest",
@@ -281,7 +288,7 @@ export const bookSeats = async (req, res) => {
       show: showId,
       amount: seats.length * (show.showPrice || 0),
       bookedSeats: seats,
-      isPaid: false, // integrate Stripe if needed
+      isPaid: false,
     });
     await booking.save();
 
