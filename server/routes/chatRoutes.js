@@ -306,14 +306,12 @@
 
 import express from "express";
 import { askQuestion, bookSeats } from "../controllers/chatController.js";
-import { clerkMiddleware, requireAuth } from "@clerk/express";
 
 const router = express.Router();
 
-router.use(clerkMiddleware());
-
-router.post("/ask", requireAuth(), askQuestion);
-router.post("/book", requireAuth(), bookSeats);
+router.post("/ask", askQuestion); 
+router.post("/book", bookSeats);  
 
 export default router;
+
 
