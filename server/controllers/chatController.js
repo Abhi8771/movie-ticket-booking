@@ -149,7 +149,6 @@
 
 import OpenAI from "openai";
 import Show from "../models/Show.js";
-import Movie from "../models/Movie.js";
 
 // Initialize OpenRouter AI
 const openrouter = new OpenAI({
@@ -166,10 +165,10 @@ export const askQuestion = async (req, res) => {
     }
 
     const lower = question.toLowerCase();
+    const now = new Date();
 
     // --- 1a. List currently showing movies ---
     if (lower.includes("currently showing") || lower.includes("movies")) {
-      const now = new Date();
       const upcomingShows = await Show.find({ showDateTime: { $gte: now } })
         .populate("movie", "title poster_path overview vote_average runtime")
         .limit(10);
@@ -198,40 +197,42 @@ export const askQuestion = async (req, res) => {
         return res.json({ type: "text", answer: "Please mention the movie name." });
       }
 
-      const show = await Show.findOne({}).populate({
-        path: "movie",
-        match: { title: { $regex: movieName, $options: "i" } },
-      });
+      const show = await Show.findOne({ showDateTime: { $gte: now } })
+        .populate({
+          path: "movie",
+          match: { title: { $regex: movieName, $options: "i" } },
+        });
 
-      if (!show || !show.movie) {
-        return res.json({ type: "text", answer: `No information found for "${movieName}".` });
-      }
-
-      return res.json({
-        type: "movieInfo",
-        answer: `Here is the information for "${show.movie.title}":`,
-        movie: {
-          title: show.movie.title,
-          poster: show.movie.poster_path,
-          overview: show.movie.overview || "No description available",
-          rating: show.movie.vote_average || "N/A",
-          runtime: show.movie.runtime || "N/A",
-          showDateTime: show.showDateTime,
-        },
-        guide: `To book tickets: 
+      if (show && show.movie) {
+        return res.json({
+          type: "movieInfo",
+          answer: `Here is the information for "${show.movie.title}":`,
+          movie: {
+            title: show.movie.title,
+            poster: show.movie.poster_path,
+            overview: show.movie.overview || "No description available",
+            rating: show.movie.vote_average || "N/A",
+            runtime: show.movie.runtime || "N/A",
+            showDateTime: show.showDateTime,
+          },
+          guide: `To book tickets: 
 1. Click on the "Buy Ticket" button below the desired movie. 
 2. Select the show date and time, then pick your desired seats (if available). 
 3. Click "Proceed to Checkout". 
-4. You will be directed to the Stripe payment page to complete your payment.`,
-      });
+4. Complete your payment on the Stripe page.`,
+        });
+      }
     }
 
-    // --- 1c. Fallback AI using OpenRouter ---
+    // --- 1c. Fallback to AI ---
     const aiResponse = await openrouter.chat.completions.create({
       model: "anthropic/claude-3.5-sonnet",
       messages: [
-        { role: "system", content: "You are a helpful assistant for a movie booking service. Give brief answers about currently showing movies, their showtimes, reviews, and guide users for booking tickets." },
-        { role: "user", content: question }
+        {
+          role: "system",
+          content: "You are a helpful assistant for a movie booking service. Give brief answers about currently showing movies, showtimes, reviews, and guide users for booking tickets.",
+        },
+        { role: "user", content: question },
       ],
       max_tokens: 250,
     });
@@ -239,11 +240,11 @@ export const askQuestion = async (req, res) => {
     const aiAnswer = aiResponse?.choices?.[0]?.message?.content?.trim() || 
                      "I don't have information on that.";
 
-    res.json({ type: "text", answer: aiAnswer });
+    return res.json({ type: "text", answer: aiAnswer });
 
   } catch (err) {
     console.error("askQuestion error:", err);
-    res.status(500).json({ type: "error", answer: "Server error while processing question." });
+    return res.status(500).json({ type: "error", answer: "Server error while processing question." });
   }
 };
 
