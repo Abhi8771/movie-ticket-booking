@@ -303,15 +303,15 @@
 // });
 
 // export default router;
-
 import express from "express";
-import { askQuestion, bookSeats } from "../controllers/chatController.js";
+import { chatWithBot } from "../controllers/chatController.js"; // updated import
 
 const router = express.Router();
 
-router.post("/ask", askQuestion); 
-router.post("/book", bookSeats);  
+// Single endpoint for interactive chat
+router.post("/interactive", chatWithBot);
 
 export default router;
+
 
 
