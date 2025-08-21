@@ -313,7 +313,7 @@ import { useState, useRef, useEffect } from "react";
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { sender: "bot", type: "text", answer: "Hi! How can I help you with bookings today?" }
+    { sender: "bot", type: "text", answer: "Hi! I can help you with movies, showtimes, and bookings." }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -322,17 +322,14 @@ export default function ChatBot() {
 
   const baseUrl = (import.meta.env.VITE_BASE_URL || "").replace(/\/$/, "");
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  useEffect(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), [messages]);
 
   const pushMessage = (msg) => setMessages(prev => [...prev, msg]);
 
-  // --- Send user question to AI ---
+  // Send message to AI
   const sendMessage = async (overrideText) => {
     const text = (overrideText ?? input).trim();
     if (!text) return;
-
     pushMessage({ sender: "user", type: "text", answer: text });
     setInput(""); setLoading(true);
 
@@ -343,50 +340,13 @@ export default function ChatBot() {
         body: JSON.stringify({ question: text }),
       });
       const data = await res.json();
-
-      pushMessage({ sender: "bot", type: data.type || "text", ...data });
+      pushMessage({ sender: "bot", ...data });
     } catch (err) {
       console.error(err);
       pushMessage({ sender: "bot", type: "error", answer: "Error reaching server." });
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  // --- Handle booking seats ---
-  const handleSeatBooking = async (showId, seat) => {
-    const userName = window.prompt("Enter your name:") || "Guest";
-    const userEmail = window.prompt("Enter your email:") || "guest@example.com";
-
-    const seatsToBook = selectedSeats[showId] || [seat];
-
-    pushMessage({ sender: "user", type: "text", answer: `Book seat(s) ${seatsToBook.join(", ")}` });
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${baseUrl}/api/chat/book`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ showId, seats: seatsToBook, userName, userEmail }),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        pushMessage({ sender: "bot", type: "text", answer: data.message });
-        // Reset selected seats
-        setSelectedSeats(prev => ({ ...prev, [showId]: [] }));
-      } else {
-        pushMessage({ sender: "bot", type: "error", answer: data.message || "Booking failed." });
-      }
-    } catch (err) {
-      console.error(err);
-      pushMessage({ sender: "bot", type: "error", answer: "Booking failed due to network/server error." });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // --- Handle seat selection (multi-seat support) ---
   const toggleSeat = (showId, seat) => {
     setSelectedSeats(prev => {
       const current = prev[showId] || [];
@@ -395,7 +355,27 @@ export default function ChatBot() {
     });
   };
 
-  // --- Bubble style ---
+  const handleSeatBooking = async (showId) => {
+    const seats = selectedSeats[showId];
+    if (!seats || seats.length === 0) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${baseUrl}/api/chat/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ showId, seats }),
+      });
+      const data = await res.json();
+      if (data.success) pushMessage({ sender: "bot", type: "text", answer: data.message });
+      else pushMessage({ sender: "bot", type: "error", answer: data.message });
+      setSelectedSeats(prev => ({ ...prev, [showId]: [] }));
+    } catch (err) {
+      console.error(err);
+      pushMessage({ sender: "bot", type: "error", answer: "Booking failed" });
+    } finally { setLoading(false); }
+  };
+
   const bubbleClass = (msg) =>
     `p-2 rounded-lg max-w-[80%] text-sm text-black ${
       msg.sender === "bot" ? "bg-gray-200 self-start" : "bg-blue-200 self-end ml-auto"
@@ -403,51 +383,50 @@ export default function ChatBot() {
 
   return (
     <div>
-      {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          className="fixed bottom-5 right-5 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition"
-          aria-label="Open chat"
-        >
-          💬
-        </button>
-      )}
-
+      {!open && <button onClick={() => setOpen(true)} className="fixed bottom-5 right-5 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700">💬</button>}
       {open && (
         <div className="fixed bottom-5 right-5 w-96 h-[500px] bg-white shadow-xl rounded-lg flex flex-col border">
-          {/* Header */}
           <div className="flex justify-between items-center p-3 bg-blue-600 text-white rounded-t-lg">
             <span>AI Assistant</span>
-            <button onClick={() => setOpen(false)} aria-label="Close chat">✖</button>
+            <button onClick={() => setOpen(false)}>✖</button>
           </div>
-
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
             {messages.map((msg, idx) => {
-              // --- Seats UI ---
-              if (msg.type === "seats" && Array.isArray(msg.seats)) {
+              if (msg.type === "movies") {
                 return (
-                  <div key={idx} className={bubbleClass({ sender: "bot" })}>
-                    <div className="font-semibold mb-1">{msg.answer || "Seat availability:"}</div>
+                  <div key={idx} className={bubbleClass(msg)}>
+                    {msg.answer}
+                    {msg.movies.map(m => (
+                      <div key={m.id} className="flex gap-2 mb-2 border rounded p-1">
+                        <img src={m.poster} alt={m.title} className="w-16 h-20 object-cover rounded"/>
+                        <div className="text-xs">
+                          <div className="font-semibold">{m.title}</div>
+                          <div>{m.overview.slice(0, 60)}...</div>
+                          <div>Rating: {m.rating} | {m.runtime} min</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+              if (msg.type === "seats") {
+                return (
+                  <div key={idx} className={bubbleClass(msg)}>
+                    {msg.answer}
                     {msg.seats.map(show => (
                       <div key={show.id} className="mb-2">
                         <div className="text-sm font-medium">{show.movie} — {new Date(show.showDateTime).toLocaleString()}</div>
                         <div className="text-xs text-gray-600 mb-1">Price: ₹{show.price}</div>
                         <div className="grid grid-cols-8 gap-1">
-                          {show.availableSeats?.map(seat => (
-                            <button
-                              key={seat}
-                              onClick={() => toggleSeat(show.id, seat)}
-                              className={`px-2 py-1 rounded text-xs ${
-                                selectedSeats[show.id]?.includes(seat) ? "bg-green-500 text-white" : "bg-green-200 hover:bg-green-300"
-                              }`}
-                            >
+                          {show.availableSeats.map(seat => (
+                            <button key={seat} onClick={() => toggleSeat(show.id, seat)}
+                              className={`px-2 py-1 rounded text-xs ${selectedSeats[show.id]?.includes(seat) ? "bg-green-500 text-white" : "bg-green-200 hover:bg-green-300"}`}>
                               {seat}
                             </button>
                           ))}
                         </div>
                         {selectedSeats[show.id]?.length > 0 && (
-                          <button
+                                                    <button
                             onClick={() => handleSeatBooking(show.id)}
                             className="mt-1 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs"
                           >
@@ -460,34 +439,21 @@ export default function ChatBot() {
                 );
               }
 
-              // --- Movies UI ---
-              if (msg.type === "movies" && Array.isArray(msg.movies)) {
-                return (
-                  <div key={idx} className={bubbleClass({ sender: "bot" })}>
-                    <div className="font-semibold mb-1">{msg.answer || "Movies:"}</div>
-                    {msg.movies.map(movie => (
-                      <div key={movie.id} className="flex gap-2 mb-2 border rounded p-1">
-                        <img src={movie.poster} alt={movie.title} className="w-16 h-20 object-cover rounded" />
-                        <div className="text-xs">
-                          <div className="font-semibold">{movie.title}</div>
-                          <div>{movie.overview.slice(0, 60)}...</div>
-                          <div>Rating: {movie.rating} | {movie.runtime} min</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              }
-
-              // --- Default text ---
-              return <div key={idx} className={bubbleClass(msg)}>{msg.answer || msg.text}</div>;
+              // Default text bubble
+              return (
+                <div key={idx} className={bubbleClass(msg)}>
+                  {msg.answer || msg.text}
+                </div>
+              );
             })}
 
-            {loading && <div className="text-gray-500 text-xs">Bot is typing...</div>}
+            {loading && (
+              <div className="text-gray-500 text-xs">Bot is typing...</div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
+          {/* Input box */}
           <div className="p-2 border-t flex gap-2">
             <input
               type="text"
@@ -509,3 +475,4 @@ export default function ChatBot() {
     </div>
   );
 }
+
