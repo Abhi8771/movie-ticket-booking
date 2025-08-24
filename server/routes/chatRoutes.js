@@ -303,15 +303,13 @@
 // });
 
 // export default router;
-import express from "express";
-import { askQuestion } from "../controllers/chatController.js";
+import { Router } from 'express';
+import { askQuestion } from '../controllers/chatController.js';
 
-const router = express.Router();
-
-// Single endpoint for interactive chat
-router.post("/ask", askQuestion);
-
+const router = Router();
+router.post('/ask', askQuestion);
 export default router;
+
 
 
 
