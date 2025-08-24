@@ -245,164 +245,446 @@
 //   }
 // }
 
-import fetch from 'node-fetch';
-import { findMovieByTitle } from '../services/movieService.js';
-import { listUpcomingShows, listShowtimesForMovieId, nextShowForTitle, getOccupiedSeats } from '../services/showService.js';
+// import fetch from 'node-fetch';
+// import { findMovieByTitle } from '../services/movieService.js';
+// import { listUpcomingShows, listShowtimesForMovieId, nextShowForTitle, getOccupiedSeats } from '../services/showService.js';
 
-async function getIntentFromOpenRouter(question) {
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'openai/gpt-4o-mini',   // You can pick any model available
-      messages: [
-        {
-          role: 'system',
-          content: `You are an intent parser for a movie booking assistant.
-Output strictly in JSON with fields: type (LIST_MOVIES, MOVIE_INFO, SHOWTIMES, SEATS_BY_SHOW, SEATS_BY_TITLE, HELP), title (if any), showId (if any).`
-        },
-        { role: 'user', content: question }
-      ],
-      temperature: 0, // Make output deterministic
-    }),
-  });
+// async function getIntentFromOpenRouter(question) {
+//   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+//     method: 'POST',
+//     headers: {
+//       'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+//       'Content-Type': 'application/json'
+//     },
+//     body: JSON.stringify({
+//       model: 'openai/gpt-4o-mini',   // You can pick any model available
+//       messages: [
+//         {
+//           role: 'system',
+//           content: `You are an intent parser for a movie booking assistant.
+// Output strictly in JSON with fields: type (LIST_MOVIES, MOVIE_INFO, SHOWTIMES, SEATS_BY_SHOW, SEATS_BY_TITLE, HELP), title (if any), showId (if any).`
+//         },
+//         { role: 'user', content: question }
+//       ],
+//       temperature: 0, // Make output deterministic
+//     }),
+//   });
 
-  const data = await response.json();
-  // Extract JSON from model output
-  let intent = {};
-  try {
-    intent = JSON.parse(data.choices[0].message.content);
-  } catch (e) {
-    console.error('OpenRouter parse error:', e.message);
-    intent = { type: 'HELP' };
-  }
-  return intent;
+//   const data = await response.json();
+//   // Extract JSON from model output
+//   let intent = {};
+//   try {
+//     intent = JSON.parse(data.choices[0].message.content);
+//   } catch (e) {
+//     console.error('OpenRouter parse error:', e.message);
+//     intent = { type: 'HELP' };
+//   }
+//   return intent;
+// }
+
+// export async function askQuestion(req, res) {
+//   try {
+//     const { question } = req.body || {};
+//     if (!question || typeof question !== 'string') {
+//       return res.status(400).json({ type: 'error', answer: 'Please ask a valid question.' });
+//     }
+
+//     // --- New: use OpenRouter AI for intent parsing ---
+//     const intent = await getIntentFromOpenRouter(question);
+
+//     switch (intent.type) {
+//       case 'LIST_MOVIES': {
+//         const upcoming = await listUpcomingShows(10);
+//         if (!upcoming.length) {
+//           return res.json({ type: 'text', answer: 'No movies are currently showing.' });
+//         }
+//         const movies = upcoming.map(s => ({
+//           id: s._id,
+//           title: s.movie.title,
+//           poster: s.movie.poster_path,
+//           overview: s.movie.overview || 'No description available',
+//           rating: s.movie.vote_average ?? 'N/A',
+//           runtime: s.movie.runtime ?? 'N/A',
+//           showDateTime: s.showDateTime,
+//         }));
+//         return res.json({ type: 'movies', answer: 'Here are the currently showing movies with showtimes:', movies });
+//       }
+
+//       case 'MOVIE_INFO': {
+//         const movie = await findMovieByTitle(intent.title);
+//         if (!movie) return res.json({ type: 'text', answer: `I couldn't find "${intent.title}".` });
+
+//         const showtimes = await listShowtimesForMovieId(movie._id);
+//         const nearest = showtimes[0];
+
+//         return res.json({
+//           type: 'movieInfo',
+//           answer: `Here is the information for "${movie.title}":`,
+//           movie: {
+//             id: nearest?._id || null,
+//             title: movie.title,
+//             poster: movie.poster_path,
+//             overview: movie.overview || 'No description available',
+//             rating: movie.vote_average ?? 'N/A',
+//             runtime: movie.runtime ?? 'N/A',
+//             showDateTime: nearest?.showDateTime || null,
+//           },
+//           guide: nearest
+//             ? `To book tickets:
+// 1) Click "Buy Ticket".
+// 2) Pick seats for the ${new Date(nearest.showDateTime).toLocaleString()} show.
+// 3) Proceed to checkout and complete payment.`
+//             : `No upcoming showtimes found. Check back later.`,
+//         });
+//       }
+
+//       case 'SHOWTIMES': {
+//         const movie = await findMovieByTitle(intent.title);
+//         if (!movie) return res.json({ type: 'text', answer: `No results for "${intent.title}".` });
+
+//         const showtimes = await listShowtimesForMovieId(movie._id);
+//         if (!showtimes.length) {
+//           return res.json({ type: 'text', answer: `No upcoming showtimes for "${movie.title}".` });
+//         }
+
+//         const lines = showtimes.map(s => `• ${new Date(s.showDateTime).toLocaleString()}  (showId: ${s._id})`);
+//         return res.json({
+//           type: 'text',
+//           answer: `Showtimes for "${movie.title}":\n${lines.join('\n')}\n\nTip: ask "seats for show <showId>" to check availability.`,
+//         });
+//       }
+
+//       case 'SEATS_BY_SHOW': {
+//         const show = await getOccupiedSeats(intent.showId);
+//         if (!show) return res.json({ type: 'text', answer: 'Show not found.' });
+
+//         const occupied = Object.keys(show.occupiedSeats || {});
+//         const summary = occupied.length ? occupied.join(', ') : 'None';
+
+//         return res.json({
+//           type: 'seatInfo',
+//           answer: `Occupied seats for show ${show._id} (${new Date(show.showDateTime).toLocaleString()}): ${summary}\nAll other seats are available.`,
+//           occupiedSeats: occupied,
+//           showId: show._id,
+//         });
+//       }
+
+//       case 'SEATS_BY_TITLE': {
+//         const movie = await findMovieByTitle(intent.title);
+//         if (!movie) return res.json({ type: 'text', answer: `No results for "${intent.title}".` });
+
+//         const show = await nextShowForTitle(movie._id);
+//         if (!show) return res.json({ type: 'text', answer: `No upcoming shows for "${movie.title}".` });
+
+//         const occupied = Object.keys(show.occupiedSeats || {});
+//         const summary = occupied.length ? occupied.join(', ') : 'None';
+
+//         return res.json({
+//           type: 'seatInfo',
+//           answer: `Occupied seats for "${movie.title}" (next show: ${new Date(show.showDateTime).toLocaleString()} – showId: ${show._id}): ${summary}\nAll other seats are available.`,
+//           occupiedSeats: occupied,
+//           showId: show._id,
+//         });
+//       }
+
+//       case 'HELP':
+//       default:
+//         return res.json({
+//           type: 'text',
+//           answer:
+// `I can help with:
+// • "currently showing" – list movies & nearest showtimes
+// • "info about <title>" – movie info + nearest show
+// • "showtimes <title>" – all upcoming times
+// • "seats for show <showId>" – seat availability
+// • "seats for <title>" – next show's occupancy
+// • Booking: open a movie card and click "Buy Ticket"`,
+//         });
+//     }
+//   } catch (err) {
+//     console.error('askQuestion error:', err);
+//     return res.status(500).json({ type: 'error', answer: 'Server error while processing question.' });
+//   }
+// }
+
+
+// controllers/chatController.js  (update/replace)
+import crypto from "crypto";
+import Movie from "../models/Movie.js";
+import Show from "../models/Show.js";
+import { findMovieByTitle } from "../services/movieService.js";
+import { listUpcomingShows, listShowtimesForMovieId, nextShowForTitle, getOccupiedSeats } from "../services/showService.js";
+
+// In-memory sessions: key -> { step, movieId, showId, seats }
+const bookingSessions = new Map();
+
+function makeSessionId() {
+  if (crypto && crypto.randomUUID) return crypto.randomUUID();
+  return Math.random().toString(36).slice(2, 12);
+}
+
+// Helper to parse seat list like "A1,A2" or "A1, A2"
+function parseSeatList(text) {
+  if (!text) return [];
+  return text
+    .split(",")
+    .map(s => s.trim().toUpperCase())
+    .filter(Boolean);
 }
 
 export async function askQuestion(req, res) {
   try {
-    const { question } = req.body || {};
-    if (!question || typeof question !== 'string') {
-      return res.status(400).json({ type: 'error', answer: 'Please ask a valid question.' });
+    const { question, sessionId: incomingSessionId } = req.body || {};
+    if (!question || typeof question !== "string") {
+      return res.status(400).json({ type: "error", answer: "Please ask a valid question." });
+    }
+    const q = question.trim();
+
+    // Normalize incoming sessionId (client stores it)
+    const sessionId = incomingSessionId || null;
+    let session = sessionId ? bookingSessions.get(sessionId) : null;
+
+    // ------------- Booking flow detection -------------
+    // 1) Start booking: "book ticket for <title>" or "book <title>"
+    const bookMatch = q.match(/book(?:\s+ticket)?(?:\s+for)?\s+(.+)/i);
+    if (bookMatch) {
+      const title = bookMatch[1].trim();
+      const movie = await findMovieByTitle(title);
+      if (!movie) {
+        return res.json({ type: "text", answer: `I couldn't find a movie named "${title}". Try typing the exact title.` });
+      }
+
+      // Find showtimes
+      const showtimes = await listShowtimesForMovieId(movie._id);
+      if (!showtimes.length) {
+        return res.json({ type: "text", answer: `No upcoming shows found for "${movie.title}".` });
+      }
+
+      // Create new session
+      const newId = makeSessionId();
+      bookingSessions.set(newId, { step: "awaiting_show", movieId: movie._id.toString() });
+
+      // Build message listing showtimes and showIds
+      const lines = showtimes.map(s => `• ${new Date(s.showDateTime).toLocaleString()}  (showId: ${s._id})`);
+      return res.json({
+        type: "text",
+        sessionId: newId,
+        answer:
+`Booking flow started for "${movie.title}".
+Here are upcoming shows:
+${lines.join("\n")}
+
+Reply in chat with:
+- "show <showId>"  (to pick the show)
+or
+- "cancel"  (to abort)
+`,
+      });
     }
 
-    // --- New: use OpenRouter AI for intent parsing ---
-    const intent = await getIntentFromOpenRouter(question);
+    // 2) If user selects a show: "show <showId>"
+    const showSelectMatch = q.match(/^show\s+([a-fA-F0-9]{24}|[A-Za-z0-9_-]+)$/i);
+    if (showSelectMatch) {
+      // require session or allow stateless selection (so showId can be used without session)
+      const showId = showSelectMatch[1];
+      const show = await Show.findById(showId).lean();
+      if (!show) return res.json({ type: "text", answer: `Show ${showId} not found.` });
 
-    switch (intent.type) {
-      case 'LIST_MOVIES': {
-        const upcoming = await listUpcomingShows(10);
-        if (!upcoming.length) {
-          return res.json({ type: 'text', answer: 'No movies are currently showing.' });
-        }
-        const movies = upcoming.map(s => ({
-          id: s._id,
-          title: s.movie.title,
-          poster: s.movie.poster_path,
-          overview: s.movie.overview || 'No description available',
-          rating: s.movie.vote_average ?? 'N/A',
-          runtime: s.movie.runtime ?? 'N/A',
-          showDateTime: s.showDateTime,
-        }));
-        return res.json({ type: 'movies', answer: 'Here are the currently showing movies with showtimes:', movies });
+      // Establish or update session
+      const sid = sessionId || makeSessionId();
+      bookingSessions.set(sid, { step: "awaiting_seats", movieId: show.movie?.toString(), showId: show._id.toString() });
+
+      const occupied = Object.keys(show.occupiedSeats || {});
+      const occStr = occupied.length ? occupied.join(", ") : "None";
+
+      return res.json({
+        type: "text",
+        sessionId: sid,
+        answer:
+`Selected show: ${new Date(show.showDateTime).toLocaleString()}.
+Occupied seats: ${occStr}
+Please reply with seats you'd like (comma-separated), for example: A1,A2
+(Reply "cancel" to stop.)`,
+      });
+    }
+
+    // 3) If session expects seats and user provides seat list (session must exist)
+    if (session && session.step === "awaiting_seats") {
+      // parse seats from message
+      const requestedSeats = parseSeatList(q);
+      if (!requestedSeats.length) {
+        return res.json({ type: "text", answer: 'Please list seats as comma-separated values, e.g. "A1,A2".', sessionId: sessionId });
       }
 
-      case 'MOVIE_INFO': {
-        const movie = await findMovieByTitle(intent.title);
-        if (!movie) return res.json({ type: 'text', answer: `I couldn't find "${intent.title}".` });
+      // Load show
+      const show = await Show.findById(session.showId).lean();
+      if (!show) {
+        bookingSessions.delete(sessionId);
+        return res.json({ type: "text", answer: "Show no longer exists. Booking aborted." });
+      }
 
-        const showtimes = await listShowtimesForMovieId(movie._id);
-        const nearest = showtimes[0];
-
+      // Check availability
+      const occupied = show.occupiedSeats || {};
+      const taken = requestedSeats.filter(s => occupied[s]);
+      if (taken.length) {
         return res.json({
-          type: 'movieInfo',
-          answer: `Here is the information for "${movie.title}":`,
-          movie: {
-            id: nearest?._id || null,
-            title: movie.title,
-            poster: movie.poster_path,
-            overview: movie.overview || 'No description available',
-            rating: movie.vote_average ?? 'N/A',
-            runtime: movie.runtime ?? 'N/A',
-            showDateTime: nearest?.showDateTime || null,
-          },
-          guide: nearest
-            ? `To book tickets:
-1) Click "Buy Ticket".
-2) Pick seats for the ${new Date(nearest.showDateTime).toLocaleString()} show.
-3) Proceed to checkout and complete payment.`
-            : `No upcoming showtimes found. Check back later.`,
+          type: "text",
+          sessionId,
+          answer: `Sorry — these seats are already taken: ${taken.join(", ")}. Please pick different seats.`,
         });
       }
 
-      case 'SHOWTIMES': {
-        const movie = await findMovieByTitle(intent.title);
-        if (!movie) return res.json({ type: 'text', answer: `No results for "${intent.title}".` });
+      // Seats available — prepare booking url (frontend booking page will handle payment & auth)
+      const origin = req.get("origin") || process.env.FRONTEND_URL || ""; // expected to be set in env or request
+      const seatsParam = encodeURIComponent(requestedSeats.join(","));
+      const bookingUrl = origin ? `${origin.replace(/\/$/, "")}/booking/${show._id}?seats=${seatsParam}` : `/booking/${show._id}?seats=${seatsParam}`;
 
-        const showtimes = await listShowtimesForMovieId(movie._id);
-        if (!showtimes.length) {
-          return res.json({ type: 'text', answer: `No upcoming showtimes for "${movie.title}".` });
-        }
+      // Update session to awaiting_confirmation
+      bookingSessions.set(sessionId, { ...session, step: "awaiting_confirmation", seats: requestedSeats });
 
-        const lines = showtimes.map(s => `• ${new Date(s.showDateTime).toLocaleString()}  (showId: ${s._id})`);
-        return res.json({
-          type: 'text',
-          answer: `Showtimes for "${movie.title}":\n${lines.join('\n')}\n\nTip: ask "seats for show <showId>" to check availability.`,
-        });
+      return res.json({
+        type: "bookingStep",
+        sessionId,
+        showId: show._id,
+        seats: requestedSeats,
+        answer:
+`Great — the seats ${requestedSeats.join(", ")} are available for the ${new Date(show.showDateTime).toLocaleString()} show.
+To complete booking & payment, open this secure booking page and finish checkout:
+${bookingUrl}
+
+If you want me to keep these seats reserved, note that the booking page will lock them at checkout. Reply "confirm" once you've completed payment, or "cancel" to abort.`,
+        bookingUrl,
+      });
+    }
+
+    // 4) Confirm / cancel within session
+    if (session && session.step === "awaiting_confirmation") {
+      if (/^cancel$/i.test(q)) {
+        bookingSessions.delete(incomingSessionId);
+        return res.json({ type: "text", sessionId: incomingSessionId, answer: "Booking flow cancelled." });
       }
 
-      case 'SEATS_BY_SHOW': {
-        const show = await getOccupiedSeats(intent.showId);
-        if (!show) return res.json({ type: 'text', answer: 'Show not found.' });
+      if (/^confirm$/i.test(q) || /done|completed|paid/i.test(q)) {
+        // We can't verify payment in chat (Stripe/Inngest will notify server). So we simply acknowledge.
+        bookingSessions.delete(incomingSessionId);
+        return res.json({ type: "text", answer: "Thanks — if payment succeeded your booking will appear in My Bookings. If not, open the booking page and retry." });
+      }
 
+      // Not confirm/cancel — guide
+      return res.json({ type: "text", sessionId: incomingSessionId, answer: 'Please reply "confirm" after completing payment, or "cancel" to abort.' });
+    }
+
+    // 5) User asked simple seat availability without booking flow:
+    if (/seat availability|available seats|seats for show/i.test(q)) {
+      // Try to extract showId or title
+      const showIdMatch = q.match(/show\s+([a-fA-F0-9]{24}|[A-Za-z0-9_-]+)/i);
+      if (showIdMatch) {
+        const show = await Show.findById(showIdMatch[1]).lean();
+        if (!show) return res.json({ type: "text", answer: "Show not found." });
         const occupied = Object.keys(show.occupiedSeats || {});
-        const summary = occupied.length ? occupied.join(', ') : 'None';
-
-        return res.json({
-          type: 'seatInfo',
-          answer: `Occupied seats for show ${show._id} (${new Date(show.showDateTime).toLocaleString()}): ${summary}\nAll other seats are available.`,
-          occupiedSeats: occupied,
-          showId: show._id,
-        });
+        return res.json({ type: "seatInfo", answer: `Occupied seats for show ${show._id}: ${occupied.length ? occupied.join(", ") : "None"}`, occupiedSeats: occupied, showId: show._id });
       }
 
-      case 'SEATS_BY_TITLE': {
-        const movie = await findMovieByTitle(intent.title);
-        if (!movie) return res.json({ type: 'text', answer: `No results for "${intent.title}".` });
-
+      // Try title
+      const titleMatch = q.match(/seats for\s+(.+)/i);
+      if (titleMatch) {
+        const title = titleMatch[1].trim();
+        const movie = await findMovieByTitle(title);
+        if (!movie) return res.json({ type: "text", answer: `No movie found for "${title}".` });
         const show = await nextShowForTitle(movie._id);
-        if (!show) return res.json({ type: 'text', answer: `No upcoming shows for "${movie.title}".` });
-
+        if (!show) return res.json({ type: "text", answer: `No upcoming shows for "${movie.title}".` });
         const occupied = Object.keys(show.occupiedSeats || {});
-        const summary = occupied.length ? occupied.join(', ') : 'None';
-
-        return res.json({
-          type: 'seatInfo',
-          answer: `Occupied seats for "${movie.title}" (next show: ${new Date(show.showDateTime).toLocaleString()} – showId: ${show._id}): ${summary}\nAll other seats are available.`,
-          occupiedSeats: occupied,
-          showId: show._id,
-        });
+        return res.json({ type: "seatInfo", answer: `Occupied seats for "${movie.title}" (next show - showId: ${show._id}): ${occupied.length ? occupied.join(", ") : "None"}`, occupiedSeats: occupied, showId: show._id });
       }
 
-      case 'HELP':
-      default:
-        return res.json({
-          type: 'text',
-          answer:
+      return res.json({ type: "text", answer: 'To check seat availability say "seats for <movie title>" or "seats for show <showId>".' });
+    }
+
+    // ---------------- Existing non-booking intents ----------------
+    // Keep the rest of your existing intent logic (LIST_MOVIES, MOVIE_INFO, SHOWTIMES, HELP)
+    // For brevity, we tie into the functions you already use:
+    // (If you use OpenRouter intent parsing, you can integrate that here as well.)
+
+    // LIST_MOVIES
+    if (/currently showing|now playing|what movies|movies\b/i.test(q)) {
+      const upcoming = await listUpcomingShows(10);
+      if (!upcoming.length) return res.json({ type: "text", answer: "No movies are currently showing." });
+
+      // Build movie list — **no Buy Ticket button**
+      const movies = upcoming.map(s => ({
+        id: s._id,
+        title: s.movie.title,
+        poster: s.movie.poster_path,
+        overview: s.movie.overview || "No description available",
+        rating: s.movie.vote_average ?? "N/A",
+        runtime: s.movie.runtime ?? "N/A",
+        showDateTime: s.showDateTime,
+      }));
+
+      return res.json({
+        type: "movies",
+        answer: `Here are the currently showing movies with showtimes. To start booking for a movie type: "book ticket for <movie title>". To pick a show directly reply "show <showId>".`,
+        movies,
+      });
+    }
+
+    // MOVIE_INFO
+    const infoMatch = q.match(/\b(info|details)\s+about\s+(.+)/i);
+    if (infoMatch) {
+      const title = infoMatch[2].trim();
+      const movie = await findMovieByTitle(title);
+      if (!movie) return res.json({ type: "text", answer: `I couldn't find "${title}".` });
+
+      const showtimes = await listShowtimesForMovieId(movie._id);
+      const nearest = showtimes[0];
+
+      return res.json({
+        type: "movieInfo",
+        answer: `Here is the information for "${movie.title}". To book, type "book ticket for ${movie.title}".`,
+        movie: {
+          id: nearest?._id || null,
+          title: movie.title,
+          poster: movie.poster_path,
+          overview: movie.overview || "No description available",
+          rating: movie.vote_average ?? "N/A",
+          runtime: movie.runtime ?? "N/A",
+          showDateTime: nearest?.showDateTime || null,
+        },
+        guide: nearest
+          ? `Next show: ${new Date(nearest.showDateTime).toLocaleString()} (showId: ${nearest._id}). To pick this show reply "show ${nearest._id}".`
+          : `No upcoming showtimes found.`,
+      });
+    }
+
+    // SHOWTIMES
+    const showtimesMatch = q.match(/\b(showtimes?|showtime)\s+(.+)/i);
+    if (showtimesMatch) {
+      const title = showtimesMatch[2].trim();
+      const movie = await findMovieByTitle(title);
+      if (!movie) return res.json({ type: "text", answer: `No results for "${title}".` });
+
+      const showtimes = await listShowtimesForMovieId(movie._id);
+      if (!showtimes.length) return res.json({ type: "text", answer: `No upcoming showtimes for "${movie.title}".` });
+
+      const lines = showtimes.map(s => `• ${new Date(s.showDateTime).toLocaleString()}  (showId: ${s._id})`);
+      return res.json({ type: "text", answer: `Showtimes for "${movie.title}":\n${lines.join("\n")}\n\nTip: reply "show <showId>" to start booking for a specific show.` });
+    }
+
+    // HELP / fallback
+    return res.json({
+      type: "text",
+      answer:
 `I can help with:
 • "currently showing" – list movies & nearest showtimes
 • "info about <title>" – movie info + nearest show
 • "showtimes <title>" – all upcoming times
 • "seats for show <showId>" – seat availability
-• "seats for <title>" – next show's occupancy
-• Booking: open a movie card and click "Buy Ticket"`,
-        });
-    }
+• "book ticket for <title>" – start booking flow (chat-driven)
+`,
+    });
+
   } catch (err) {
-    console.error('askQuestion error:', err);
-    return res.status(500).json({ type: 'error', answer: 'Server error while processing question.' });
+    console.error("askQuestion error:", err);
+    return res.status(500).json({ type: "error", answer: "Server error while processing question." });
   }
 }
