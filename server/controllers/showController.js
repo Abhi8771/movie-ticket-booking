@@ -138,7 +138,7 @@ for (const show of showsInput) {
 
     showsToCreate.push({
       movie: movieId,
-      showDateTime: dateTime, // stored in UTC
+      showDateTime: dateTime, 
       showPrice,
       occupiedSeats: {},
     });
@@ -214,7 +214,7 @@ export const getShow = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Movie not found' });
     }
 
-    // Group show times by date (YYYY-MM-DD)
+    // Group show times by date 
     const dateTime = {};
 
     for (const show of shows) {
