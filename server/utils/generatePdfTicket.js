@@ -1,17 +1,15 @@
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
 import { PassThrough } from "stream";
-import istString from "../lib/istString.js";
 
 export const generatePdfTicket = async (booking) => {
   const { _id: bookingId, userName, movieName, showDate, showTime, bookedSeats } = booking;
 
-  const istString = istString(showDate, showTime);
 
   // Generate QR Code as base64 image
   const qrData = await QRCode.toDataURL(`Booking ID: ${bookingId}`);
 
-  const doc = new PDFDocument({ size: [400, 200], margin: 0 }); // Ticket-like size
+  const doc = new PDFDocument({ size: [400, 200], margin: 0 }); 
   const stream = new PassThrough();
   doc.pipe(stream);
 
@@ -33,9 +31,8 @@ export const generatePdfTicket = async (booking) => {
     .fillColor("black")
     .font("Helvetica")
     .text(`Movie: ${movieName}`, 20, 50)
-    // .text(`Date: ${showDate}`, 20, 70)
-    // .text(`Time: ${showTime}`, 20, 90)
-    .text(`Show: ${istString}`, 20, 70)
+    .text(`Date: ${showDate}`, 20, 70)
+    .text(`Time: ${showTime}`, 20, 90)
     .text(`Seats: ${bookedSeats.join(", ")}`, 20, 110)
     .text(`Name: ${userName}`, 20, 130);
 
