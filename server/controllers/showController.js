@@ -91,36 +91,66 @@ export const addShow = async (req, res) => {
     }
 
     // Prepare Show docs to create
-    const showsToCreate = [];
+    // const showsToCreate = [];
 
-    for (const show of showsInput) {
-      if (!show.date || !Array.isArray(show.time)) {
-        return res.status(400).json({ success: false, message: 'Invalid showsInput format' });
-      }
+    // for (const show of showsInput) {
+    //   if (!show.date || !Array.isArray(show.time)) {
+    //     return res.status(400).json({ success: false, message: 'Invalid showsInput format' });
+    //   }
 
-      for (const time of show.time) {
-        // Construct ISO datetime string; assumes time like 'HH:mm'
-        const dateTimeString = `${show.date}T${time}:00Z`; // Adding seconds for valid ISO
-        // const dateTime = new Date(`${show.date}T${time}:00+05:30`);
-        const dateTime = new Date(dateTimeString);
-        if (isNaN(dateTime.getTime())) {
-          return res.status(400).json({ success: false, message: `Invalid date/time: ${dateTimeString}` });
-        }
+    //   for (const time of show.time) {
+    //     // Construct ISO datetime string; assumes time like 'HH:mm'
+    //     const dateTimeString = `${show.date}T${time}:00Z`; // Adding seconds for valid ISO
+    //     // const dateTime = new Date(`${show.date}T${time}:00+05:30`);
+    //     const dateTime = new Date(dateTimeString);
+    //     if (isNaN(dateTime.getTime())) {
+    //       return res.status(400).json({ success: false, message: `Invalid date/time: ${dateTimeString}` });
+    //     }
 
-        showsToCreate.push({
-          movie: movieId,
-          showDateTime: dateTime,
-          showPrice,
-          occupiedSeats: {},
-        });
-      }
+    //     showsToCreate.push({
+    //       movie: movieId,
+    //       showDateTime: dateTime,
+    //       showPrice,
+    //       occupiedSeats: {},
+    //     });
+    //   }
+    // }
+
+    // if (showsToCreate.length > 0) {
+    //   await Show.insertMany(showsToCreate);
+    // } else {
+    //   return res.status(400).json({ success: false, message: 'No valid shows to add' });
+    // }
+    // Prepare Show docs to create
+const showsToCreate = [];
+
+for (const show of showsInput) {
+  if (!show.date || !Array.isArray(show.time)) {
+    return res.status(400).json({ success: false, message: 'Invalid showsInput format' });
+  }
+
+  for (const time of show.time) {
+    // Parse input as IST and convert to UTC automatically
+    const dateTime = new Date(`${show.date}T${time}:00+05:30`);
+    if (isNaN(dateTime.getTime())) {
+      return res.status(400).json({ success: false, message: `Invalid date/time: ${show.date} ${time}` });
     }
 
-    if (showsToCreate.length > 0) {
-      await Show.insertMany(showsToCreate);
-    } else {
-      return res.status(400).json({ success: false, message: 'No valid shows to add' });
-    }
+    showsToCreate.push({
+      movie: movieId,
+      showDateTime: dateTime, // stored in UTC
+      showPrice,
+      occupiedSeats: {},
+    });
+  }
+}
+
+if (showsToCreate.length > 0) {
+  await Show.insertMany(showsToCreate);
+} else {
+  return res.status(400).json({ success: false, message: 'No valid shows to add' });
+}
+
 
     // Trigger Inngest function to notify users about new shows
     await inngest.send({
