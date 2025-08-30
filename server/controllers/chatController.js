@@ -1,5 +1,3 @@
-// import Movie from "../models/Movie.js";
-// import Show from "../models/Show.js";
 import { findMovieByTitle } from "../services/movieService.js";
 import {
   listUpcomingShows,

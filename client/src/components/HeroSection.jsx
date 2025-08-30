@@ -20,7 +20,7 @@ const slides = [
   year: '2025',
   duration: '3h 5m',
   description: 'As Pandora faces a scorched invasion, Jake Sully and Neytiri must unite rival clans and confront an ancient force buried beneath the ash to protect their world from extinction.',
-  image: '/avatar1.jpg', // Replace with imported image if you prefer
+  image: '/avatar1.jpg', 
   logo: assets.avatarlogo
   },
   {
