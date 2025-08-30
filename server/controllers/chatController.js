@@ -691,15 +691,15 @@
 
 
 import crypto from "crypto";
-import Movie from "./models/Movie.js"; // Assuming Movie model is in this path
-import Show from "./models/Show.js"; // Assuming Show model is in this path
-import { findMovieByTitle } from "./services/movieService.js"; // Assuming findMovieByTitle exists
+import Movie from "../models/Movie.js";
+import Show from "../models/Show.js";
+import { findMovieByTitle } from "../services/movieService.js"; // Assuming findMovieByTitle exists
 import {
   listUpcomingShows,
   listShowtimesForMovieId,
   nextShowForTitle,
   getOccupiedSeats,
-} from "./services/showService.js"; // Assuming these service functions exist
+} from "../services/showService.js"; // Assuming these service functions exist
 
 // --- Intent Parser ---
 const patterns = {
