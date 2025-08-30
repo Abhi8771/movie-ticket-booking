@@ -10,7 +10,7 @@ const Footer = () => {
       <div className="flex flex-col items-center md:items-start text-center md:text-left max-w-xs">
         <img className="w-14 h-auto mb-3 rounded-xl shadow-md" alt="logo" src={assets.logo} />
         <p className="text-xs text-gray-300">
-          Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.
+          Your gateway to the best movie experience.Redefining your cinematic journey.
         </p>
         <div className="flex items-center gap-3 mt-3">
           <img src={assets.googlePlay} alt="google play" className="h-8 w-auto rounded-md shadow cursor-pointer" />
